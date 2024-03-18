@@ -11,6 +11,7 @@ import java.util.*;
  */
 public class Controller implements Runnable {
     private Set<Bell> bells;
+    private List<BellNote> bellNotes = new ArrayList<>();
 
     public Controller() {
         this.bells = new HashSet<>();
@@ -35,8 +36,10 @@ public class Controller implements Runnable {
                 }
                 String noteName = noteData[0];
                 Bell bell = new Bell(noteName);
-//                NoteLength noteLength = NoteLength.valueOf(noteData[1]);
+                NoteLength noteLength = NoteLength.valueOf(noteData[1]);
+                BellNote note = new BellNote(bell, noteLength);
                 bells.add(bell);
+                bellNotes.add(note);
             }
             System.out.printf("Bells: %s", bells);
 
@@ -59,6 +62,6 @@ public class Controller implements Runnable {
         final AudioFormat af =
                 new AudioFormat(Bell.NoteName.SAMPLE_RATE, 8, 1, true, false);
         Tone t = new Tone(af);
-//        t.playSong(controller.songNotes);
+        t.playSong(controller.bellNotes);
     }
 }

@@ -45,10 +45,6 @@ class Bell implements Runnable {
                 }
             }
         }
-
-        public byte[] sample() {
-            return sinSample;
-        }
     }
 
     private NoteName noteName;
@@ -63,6 +59,10 @@ class Bell implements Runnable {
 
     public void run() {}
 
+    public byte[] sample() {
+        return noteName.sinSample;
+    }
+
     public Thread getThread() {
         return this.thread;
     }
@@ -71,4 +71,5 @@ class Bell implements Runnable {
         this.thread = thread;
     }
 }
+
 

@@ -26,9 +26,10 @@ public class Tone {
     }
 
     private void playNote(SourceDataLine line, BellNote bn) {
-        final int ms = Math.min(bn.length.timeMs(), Bell.MEASURE_LENGTH_SEC * 1000);
-        final int length = Bell.SAMPLE_RATE * ms / 1000;
+        final int ms = Math.min(bn.length.timeMs(), Bell.NoteName.MEASURE_LENGTH_SEC * 1000);
+        final int length = Bell.NoteName.SAMPLE_RATE * ms / 1000;
         line.write(bn.note.sample(), 0, length);
-        line.write(Bell.REST.sample(), 0, 50);
+        Bell rest = new Bell("REST");
+        line.write(rest.sample(), 0, 50);
     }
 }

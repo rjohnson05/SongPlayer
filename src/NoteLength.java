@@ -7,7 +7,7 @@ enum NoteLength {
     private final int timeMs;
 
     NoteLength(float length) {
-        timeMs = (int)(length * Bell.MEASURE_LENGTH_SEC * 1000);
+        timeMs = (int)(length * Bell.NoteName.MEASURE_LENGTH_SEC * 1000);
     }
 
     public int timeMs() {
