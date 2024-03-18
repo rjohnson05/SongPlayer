@@ -1,0 +1,39 @@
+<project name="SongPlayer" default="compile" basedir=".">
+    <property name="src" location="src"/>
+    <property name="dist" location="dist"/>
+
+    <presetdef name="javac">
+        <javac includeantruntime="false"/>
+    </presetdef>
+
+    <target name="init">
+        <mkdir dir="${dist}"/>
+        <mkdir dir="${dist}/classes"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src}" debug="true" destdir="${dist}/classes"/>
+    </target>
+
+    <target name="jar" depends="init,compile">
+        <jar destfile="${dist}/${ant.project.name}.jar" basedir="${dist}/classes">
+            <manifest>
+                <attribute name="Main-Class" value="Controller"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="songfilearg" unless="songfile">
+        <property name="songfile" value="mary_had_a_little_lamb.txt"/>
+    </target>
+
+    <target name="run" depends="jar,songfilearg">
+        <java jar="${dist}/${ant.project.name}.jar" fork="true">
+            <arg value="${songfile}"/>
+        </java>
+    </target>
+
+    <target name="clean">
+        <delete dir="${dist}"/>
+    </target>
+</project>
