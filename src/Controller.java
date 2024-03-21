@@ -11,7 +11,6 @@ import java.util.*;
  */
 public class Controller implements Runnable {
     private Set<Bell> bells;
-    private List<BellNote> bellNotes = new ArrayList<>();
 
     public Controller() {
         this.bells = new HashSet<>();
@@ -23,14 +22,11 @@ public class Controller implements Runnable {
      * @param fileName String detailing the name of the file containing the note names/lengths
      * @return true if the notes from the file are loaded correctly; false otherwise
      */
-    public boolean importFile(String fileName) {
-        Scanner notesScanner = null;
-        try {
-            File notesFile = new File(fileName);
-            notesScanner = new Scanner(notesFile);
-
+    private boolean importFile(String fileName) {
+        try (Scanner notesScanner = new Scanner(new File(fileName))) {
             while (notesScanner.hasNextLine()) {
                 String[] noteData = notesScanner.nextLine().split(", ");
+                // if ("".equals(noteData[0]))
                 if (Objects.equals(noteData[0], "")) {
                     continue;
                 }
@@ -39,14 +35,10 @@ public class Controller implements Runnable {
                 NoteLength noteLength = NoteLength.valueOf(noteData[1]);
                 BellNote note = new BellNote(bell, noteLength);
                 bells.add(bell);
-                bellNotes.add(note);
             }
-            System.out.printf("Bells: %s", bells);
-
-            notesScanner.close();
             return true;
         } catch (FileNotFoundException e) {
-            System.out.printf("%s could not be found.", fileName);
+            System.err.printf("%s could not be found.", fileName);
             return false;
         }
     }
