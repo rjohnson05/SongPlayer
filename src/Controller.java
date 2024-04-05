@@ -170,7 +170,6 @@ public class Controller {
         final AudioFormat af = new AudioFormat(Bell.NoteName.SAMPLE_RATE, 8, 1, true, false);
 
         try (final SourceDataLine line = AudioSystem.getSourceDataLine(af)) {
-            System.out.printf("Line: %s", line);
             line.open();
             line.start();
 
