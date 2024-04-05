@@ -4,13 +4,10 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
- * Serves as the main class for the song player. Loads in the note names from the designated file and "conducts" different
+ * Serves as the main class for the song. Loads in the note names from the designated file and "conducts" different
  * threads to play at the correct times, playing the notes loaded from the file.
  *
  * @author Ryan Johnson
@@ -36,41 +33,73 @@ public class Controller {
      */
     private boolean importFile(String fileName) {
         try (Scanner notesScanner = new Scanner(new File(fileName))) {
+            int lineCounter = 0;
+            // Ensures the file is a .txt file
+            boolean fileValid = true;
+            if (!Objects.equals(getFileExtension(fileName), "txt")) {
+                System.err.println("ERROR: Song file must be a .txt file");
+                fileValid = false;
+            }
+
             // Creates a bell object for every unique note name in the file
             while (notesScanner.hasNextLine()) {
+                lineCounter++;
                 // Account for multiple spaces between note arguments and leading/trailing spaces
                 String lineOneSpace = notesScanner.nextLine().trim().replaceAll("\\s+", " ");
                 String[] noteData = lineOneSpace.split(" ");
 
                 // Validate the file
-                if (!validateLineData(lineOneSpace)) {
-                    return false;
+                if (!validateLineData(lineCounter, lineOneSpace)) {
+                    fileValid = false;
+                    continue;
                 }
 
                 String noteName = noteData[0];
-                String noteLength = noteData[1];
-
-                // Converts the number representing the note length to the kind of note
-                noteLength = switch (noteLength) {
-                    case "1" -> "WHOLE";
-                    case "2" -> "HALF";
-                    case "3" -> "TRIPLET";
-                    case "4" -> "QUARTER";
-                    case "8" -> "EIGHTH";
-                    case "16" -> "SIXTEENTH";
-                    default -> noteData[1];
-                };
+                String noteLength = convertNoteLength(noteData);
 
                 noteList.add(new String[]{noteName, noteLength});
                 if (!bells.containsKey(noteName)) {
                     bells.put(noteName, new Bell(noteName));
                 }
             }
-            return true;
+            return fileValid;
         } catch (FileNotFoundException e) {
-            System.err.printf("%s could not be found.", fileName);
+            System.err.printf("ERROR: %s could not be found.", fileName);
             return false;
         }
+    }
+
+    /**
+     * Returns the extension of a file. Used for ensuring a song file is of the correct file format.
+     *
+     * @param fileName String containing the name of the song file
+     * @return String containing the extension of the file
+     */
+    public String getFileExtension(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf(".");
+        return fileName.substring(lastDotIndex + 1);
+    }
+
+    /**
+     * Converts the length of a note from an integer string to the spelled-out version of the note length (1 -> WHOLE).
+     *
+     * @param noteData String[] containing the note name and length
+     * @return String specifying the spelled-out length of the note
+     */
+    private String convertNoteLength(String[] noteData) {
+        String noteLength = noteData[1];
+
+        // Converts the number representing the note length to the kind of note
+        noteLength = switch (noteLength) {
+            case "1" -> "WHOLE";
+            case "2" -> "HALF";
+            case "3" -> "TRIPLET";
+            case "4" -> "QUARTER";
+            case "8" -> "EIGHTH";
+            case "16" -> "SIXTEENTH";
+            default -> noteData[1];
+        };
+        return noteLength;
     }
 
     /**
@@ -81,26 +110,26 @@ public class Controller {
      *              white space or multiple spaces between arguments.
      * @return true if the data within the line is correct; false otherwise
      */
-    public boolean validateLineData(String line) {
+    public boolean validateLineData(int lineNum, String line) {
         boolean successful = true;
 
         String[] noteData = line.split(" ");
 
         // Validate that there are no empty lines
         if (noteData[0].isEmpty()) {
-            System.err.println("ERROR: An empty line cannot be contained within the song file");
+            System.err.printf("ERROR: An empty line cannot be contained within the song file (line %d)\n", lineNum);
             successful = false;
         }
 
         // Validate that there are two arguments provided for the note
         if (noteData.length < 2) {
-            System.err.printf("ERROR: Less than 2 arguments provided for a note (%s)", line);
+            System.err.printf("ERROR: Less than 2 arguments provided for a note (line %d)\n", lineNum);
             return false;
         }
 
         // Validate that only two arguments are provided for each note
         if (noteData.length > 2) {
-            System.err.printf("ERROR: More than 2 arguments provided for a note (%s)", line);
+            System.err.printf("ERROR: More than 2 arguments provided for a note (%d)\n", lineNum);
             return false;
         }
 
@@ -109,16 +138,16 @@ public class Controller {
 
         // Validates the note name
         try {
-            Bell.NoteName note = Bell.NoteName.valueOf(noteName);
+            Bell.NoteName.valueOf(noteName);
         } catch (IllegalArgumentException e) {
-            System.err.printf("ERROR: %s is not a valid note name", noteName);
+            System.err.printf("ERROR: %s is not a valid note name (line %d)\n", noteName, lineNum);
             successful = false;
         }
 
         // Validates the note length
         List<String> validLengths = new ArrayList<>(List.of("1", "2", "3", "4", "8", "16"));
         if (!validLengths.contains(noteLength)) {
-            System.err.printf("ERROR: %s is not a valid note length", noteLength);
+            System.err.printf("ERROR: %s is not a valid note length (line %d)\n", noteLength, lineNum);
             successful = false;
         }
 

@@ -78,6 +78,10 @@ public class Bell implements Runnable {
                 }
             }
         }
+
+        public byte[] sample() {
+            return sinSample;
+        }
     }
 
     private volatile boolean running;
@@ -108,24 +112,23 @@ public class Bell implements Runnable {
         final int ms = Math.min(noteLength.timeMs(), Bell.NoteName.MEASURE_LENGTH_SEC * 1000);
         final int length = Bell.NoteName.SAMPLE_RATE * ms / 1000;
         line.write(this.sample(), 0, length);
+        line.write(NoteName.REST.sample(), 0, 50);
     }
 
     /**
      * Gives a single turn to the bell, allowing to play its note for the specified amount of time. Once its turn is
      * over, the thread goes back into waiting.
      */
-    public void giveTurn() {
-        synchronized (this) {
-            if (myTurn) {
-                throw new IllegalStateException("Attempt to give a turn to a player who's hasn't completed the current turn");
-            }
-            myTurn = true;
-            notify();
-            while (myTurn) {
-                try {
-                    wait();
-                } catch (InterruptedException ignored) {}
-            }
+    public synchronized void giveTurn() {
+        if (myTurn) {
+            throw new IllegalStateException("Attempt to give a turn to a player who's hasn't completed the current turn");
+        }
+        myTurn = true;
+        notify();
+        while (myTurn) {
+            try {
+                wait();
+            } catch (InterruptedException ignored) {}
         }
     }
 
@@ -140,7 +143,6 @@ public class Bell implements Runnable {
      * Stops the execution of the bells. Prompts the thread to finish the run() method and terminate.
      */
     public void stopRunning() {
-        System.out.println("Setting running to false on thread" + thread);
         running = false;
         myTurn = true;
         synchronized (this) {
