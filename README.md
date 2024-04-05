@@ -5,7 +5,6 @@ frequency and length of the note. The frequency must specify the name of the not
 (466.16 Hz) would be specified as A4S. The length of the note is specified with an integer (1 = whole, 2 = half, 4 = quarter, etc.). These two pieces of information must be separated by a space.
 
 At the beginning of the program, a separate thread is created for each note contained within the song file. While the song is playing the main thread will notify each thread when it must play its note and for how
-long it should play for. Once the song has finished playing, all threads are shut down.  
+long it should play for. Once the song has finished playing, the program shuts down.
 
-Assuming that the provided song file is formatted correctly, the song can be played by running *ant run -Dsongfile='file_name'*. Three sample song files are provided in this project (Mary had a Little Lamb, Amazing Grace, & 
-Sweet Caroline).
+Assuming that the provided song file is formatted correctly, the song can be played by running *ant run -Dsongfile='file_name'*. Three sample song files are provided in this project (Mary had a Little Lamb, Amazing Grace, & Sweet Caroline). If no song file is provided as an argument, Mary had a Little Lamb is played by default by running *ant run*.
